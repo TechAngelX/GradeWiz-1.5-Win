@@ -9,6 +9,7 @@ namespace GradeWiz
     public partial class GradeWiz : Form
     {
         private string _moduleCode;
+        private string _moduleName;
         private Dictionary<int, (double Weighting, string Name)> _componentDetails;
         private MenuStrip _menuStrip;
 
@@ -105,7 +106,7 @@ namespace GradeWiz
         private void ShowAboutDialog()
         {
             MessageBox.Show(
-                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component marks and weightings.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
+                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component weightings and component marks.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
                 "Licensed under the GNU General Public License v3.0",
                 "About GradeWiz",
                 MessageBoxButtons.OK,
@@ -123,22 +124,23 @@ namespace GradeWiz
 
                 foreach (var line in lines)
                 {
-                    var fields = line.Split(',');
+                    var fields = line.Split('\t'); // Changed to tab-separated values
 
                     var moduleCodeInFile = fields[0].ToUpper();
                     var passedCode = passedModuleCode.ToUpper(); // Ensure case insensitivity
 
                     if (moduleCodeInFile == passedCode)
                     {
+                        _moduleName = fields[1]; // Get the module name
                         _componentDetails.Clear();
 
-                        for (int i = 1; i < fields.Length; i += 2)
+                        for (int i = 2; i < fields.Length; i += 2)
                         {
                             if (i + 1 < fields.Length)
                             {
                                 if (double.TryParse(fields[i], out double weighting))
                                 {
-                                    _componentDetails[i / 2 + 1] = (weighting, fields[i + 1]);
+                                    _componentDetails[i / 2 - 1] = (weighting, fields[i + 1]);
                                 }
                             }
                         }
@@ -259,80 +261,79 @@ namespace GradeWiz
         }
 
         private void ShowResultScreen(double[] scores)
-{
-    var panel = new Panel { Dock = DockStyle.Fill };
-
-    var resultLabel = new Label
-    {
-        Text = $"Total module mark: {CalculateTotalMark(scores):F2}",
-        Font = new Font("Arial", 15, FontStyle.Bold),
-        ForeColor = Color.Black,
-        Location = new Point(LabelX, StartY),
-        AutoSize = true
-    };
-    panel.Controls.Add(resultLabel);
-
-    for (int i = 0; i < _componentDetails.Count; i++)
-    {
-        int componentNumber = i + 1;
-        var (weighting, name) = _componentDetails[componentNumber];
-
-        var componentLabel = new Label
         {
-            Text = $"Component {componentNumber} mark ({weighting}% - {name}):",
-            Location = new Point(LabelX, StartY + LabelSpacing + i * 30),
-            AutoSize = true
-        };
-        var markLabel = new Label
-        {
-            Text = $"{scores[i] * (weighting / 100):F2}",
-            Location = new Point(LabelX + 220, StartY + LabelSpacing + i * 30),
-            AutoSize = true
-        };
+            var panel = new Panel { Dock = DockStyle.Fill };
 
-        panel.Controls.Add(componentLabel);
-        panel.Controls.Add(markLabel);
-    }
+            var resultLabel = new Label
+            {
+                Text = $"{_moduleCode.ToUpper()} {_moduleName}: Total module mark: {CalculateTotalMark(scores):F2}",
+                Font = new Font("Arial", 16, FontStyle.Bold),
+                ForeColor = Color.Black,
+                Location = new Point(LabelX, StartY),
+                AutoSize = true
+            };
+            panel.Controls.Add(resultLabel);
 
-    var backButton = new Button
-    {
-        Text = "Back",
-        Location = new Point(LabelX, StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    backButton.Click += (sender, e) => ShowComponentMarkScreen();
-    panel.Controls.Add(backButton);
+            for (int i = 0; i < _componentDetails.Count; i++)
+            {
+                int componentNumber = i + 1;
+                var (weighting, name) = _componentDetails[componentNumber];
 
-    var restartButton = new Button
-    {
-        Text = "Restart",
-        Location = new Point(LabelX + ButtonWidth + 10, StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    restartButton.Click += (sender, e) =>
-    {
-        Controls.Clear();
-        Controls.Add(_menuStrip);
-        _moduleCode = string.Empty; // Clear the module code
-        Text = "GradeWiz ✔"; // Directly set the title
-        PromptForModuleCode();
-    };
-    panel.Controls.Add(restartButton);
+                var componentLabel = new Label
+                {
+                    Text = $"Component {componentNumber} mark ({weighting}% - {name}):",
+                    Location = new Point(LabelX, StartY + LabelSpacing + i * 30),
+                    AutoSize = true
+                };
+                var markLabel = new Label
+                {
+                    Text = $"{scores[i] * (weighting / 100):F2}",
+                    Location = new Point(LabelX + 220, StartY + LabelSpacing + i * 30),
+                    AutoSize = true
+                };
 
-    var quitButton = new Button
-    {
-        Text = "Quit",
-        Location = new Point(LabelX + 2 * (ButtonWidth + 10), StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    quitButton.Click += (sender, e) => Application.Exit();
-    panel.Controls.Add(quitButton);
+                panel.Controls.Add(componentLabel);
+                panel.Controls.Add(markLabel);
+            }
 
-    Controls.Clear();
-    Controls.Add(panel);
-    Controls.Add(_menuStrip);
-}
+            var backButton = new Button
+            {
+                Text = "Back",
+                Location = new Point(LabelX, StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            backButton.Click += (sender, e) => ShowComponentMarkScreen();
+            panel.Controls.Add(backButton);
 
+            var restartButton = new Button
+            {
+                Text = "Restart",
+                Location = new Point(LabelX + ButtonWidth + 10, StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            restartButton.Click += (sender, e) =>
+            {
+                Controls.Clear();
+                Controls.Add(_menuStrip);
+                _moduleCode = string.Empty; // Clear the module code
+                Text = "GradeWiz ✔"; // Directly set the title
+                PromptForModuleCode();
+            };
+            panel.Controls.Add(restartButton);
+
+            var quitButton = new Button
+            {
+                Text = "Quit",
+                Location = new Point(LabelX + 2 * (ButtonWidth + 10), StartY + LabelSpacing + _componentDetails.Count * 30 + 10),
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            quitButton.Click += (sender, e) => Application.Exit();
+            panel.Controls.Add(quitButton);
+
+            Controls.Clear();
+            Controls.Add(panel);
+            Controls.Add(_menuStrip);
+        }
 
         private double CalculateTotalMark(double[] scores)
         {
@@ -349,7 +350,7 @@ namespace GradeWiz
         {
             var title = string.IsNullOrEmpty(_moduleCode)
                 ? "GradeWiz ✔"
-                : $"GradeWiz ✔ - {_moduleCode.ToUpper()}";
+                : $"GradeWiz ✔ - {_moduleCode.ToUpper()} {_moduleName}";
             Text = title;
 
             // Center title (if needed)
