@@ -105,7 +105,7 @@ namespace GradeWiz
         private void ShowAboutDialog()
         {
             MessageBox.Show(
-                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component weightings and component marks.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
+                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component marks and weightings.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
                 "Licensed under the GNU General Public License v3.0",
                 "About GradeWiz",
                 MessageBoxButtons.OK,
@@ -265,7 +265,7 @@ namespace GradeWiz
     var resultLabel = new Label
     {
         Text = $"Total module mark: {CalculateTotalMark(scores):F2}",
-        Font = new Font("Arial", 16, FontStyle.Bold),
+        Font = new Font("Arial", 15, FontStyle.Bold),
         ForeColor = Color.Black,
         Location = new Point(LabelX, StartY),
         AutoSize = true
@@ -349,7 +349,7 @@ namespace GradeWiz
         {
             var title = string.IsNullOrEmpty(_moduleCode)
                 ? "GradeWiz ✔"
-                : $"GradeWiz ✔ - {_moduleCode}";
+                : $"GradeWiz ✔ - {_moduleCode.ToUpper()}";
             Text = title;
 
             // Center title (if needed)
