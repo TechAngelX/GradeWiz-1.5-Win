@@ -47,7 +47,7 @@ namespace GradeWiz
             var moduleCodeTextBox = new TextBox
             {
                 Location = new Point(LabelX + 150, StartY),
-                Width = TextBoxWidth
+                Width = TextBoxWidth + 23
             };
             panel.Controls.Add(moduleCodeTextBox);
 
