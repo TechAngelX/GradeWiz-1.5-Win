@@ -79,19 +79,44 @@ namespace GradeWiz
             this.Text = title;
         }
 
+       
         private void CreateMenuBar()
         {
-            _menuStrip = new MenuStrip();
+            _menuStrip = new MenuStrip();  // Initialize the MenuStrip
             var fileMenu = new ToolStripMenuItem("File");
 
+            // About Menu Item
+            var aboutItem = new ToolStripMenuItem("About");
+            aboutItem.Click += (sender, e) => ShowAboutDialog();
+            fileMenu.DropDownItems.Add(aboutItem);
+
+            // Restart Menu Item
+            var restartItem = new ToolStripMenuItem("Restart");
+            Controls.Clear();
+                Controls.Add(_menuStrip);
+                PromptForModuleCode();
+
+            // Quit Menu Item
             var quitItem = new ToolStripMenuItem("Quit");
             quitItem.Click += (sender, e) => Application.Exit();
             fileMenu.DropDownItems.Add(quitItem);
 
             _menuStrip.Items.Add(fileMenu);
             MainMenuStrip = _menuStrip;
-            Controls.Add(_menuStrip);
+            Controls.Add(_menuStrip);  // Add the MenuStrip to the form
         }
+
+              private void ShowAboutDialog()
+{
+    MessageBox.Show(
+        "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component weightings and component marks.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
+        "Licensed under the GNU General Public License v3.0",
+        "About GradeWiz",
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Information
+    );
+}
+
 
         private void LoadDataFromCSV(string passedModuleCode)
         {
@@ -205,7 +230,7 @@ calculateButton.Click += (sender, e) =>
     }
     catch (FormatException)
     {
-        MessageBox.Show("Please enter valid numbers for the scores.");
+        MessageBox.Show("Please enter valid numbers for the marks.");
     }
 };
 panel.Controls.Add(calculateButton);
