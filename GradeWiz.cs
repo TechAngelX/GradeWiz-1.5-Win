@@ -38,7 +38,7 @@ namespace GradeWiz
 
             var label = new Label
             {
-                Text = "Enter Module Name:",
+                Text = "Enter Module Code:",
                 Location = new Point(LabelX, StartY),
                 AutoSize = true
             };
@@ -61,8 +61,6 @@ namespace GradeWiz
             {
                 _moduleCode = moduleCodeTextBox.Text;
                 LoadDataFromCSV(_moduleCode);
-                ShowComponentMarkScreen();
-                CenterTitle();
             };
             panel.Controls.Add(submitButton);
 
@@ -101,6 +99,7 @@ namespace GradeWiz
             {
                 var csvPath = Path.Combine(Environment.CurrentDirectory, "data.csv");
                 var lines = File.ReadAllLines(csvPath);
+                bool moduleCodeFound = false;
 
                 foreach (var line in lines)
                 {
@@ -110,6 +109,8 @@ namespace GradeWiz
 
                     if (moduleCodeInFile == passedModuleCode)
                     {
+                        _componentWeightings.Clear(); // Clear previous data if any
+
                         for (int i = 1; i < fields.Length; i++)
                         {
                             if (double.TryParse(fields[i], out double weighting))
@@ -117,33 +118,52 @@ namespace GradeWiz
                                 _componentWeightings[i] = weighting;
                             }
                         }
-                        return;
+                        moduleCodeFound = true;
+                        break;
                     }
                 }
 
-                MessageBox.Show($"Module code '{passedModuleCode}' not found or data format incorrect in data.csv.");
-                Application.Exit();
+                if (!moduleCodeFound)
+                {
+                    MessageBox.Show($"Module '{passedModuleCode}' not found. Ensure it is a valid CS Dept module code.");
+                    ClearScreenAndReturnToModuleCodeEntry();
+                }
+                else
+                {
+                    ShowComponentMarkScreen();
+                    CenterTitle();
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading data from data.csv: {ex.Message}");
-                Application.Exit();
+                ClearScreenAndReturnToModuleCodeEntry();
             }
+        }
+
+        private void ClearScreenAndReturnToModuleCodeEntry()
+        {
+            // Clear the current controls and return to the module code entry screen
+            Controls.Clear();
+            Controls.Add(_menuStrip);
+            PromptForModuleCode();
         }
 
         private void ShowComponentMarkScreen()
         {
             var panel = new Panel { Dock = DockStyle.Fill };
+
+            // Add the label for entering marks
             var label = new Label
             {
-                Text = "Enter marks for each component:",
+                Text = "Enter mark(s) for each component:",
                 Location = new Point(LabelX, StartY),
                 AutoSize = true
             };
             panel.Controls.Add(label);
 
+            // Create and add the mark input fields
             var markFields = new TextBox[_componentWeightings.Count];
-
             for (int i = 0; i < _componentWeightings.Count; i++)
             {
                 int componentNumber = i + 1;
@@ -165,33 +185,51 @@ namespace GradeWiz
                 panel.Controls.Add(markField);
             }
 
-            var calculateButton = new Button
-            {
-                Text = "Calculate",
-                Location = new Point(LabelX + ButtonWidth + 10, StartY + LabelSpacing + _componentWeightings.Count * ComponentSpacing + 10),
-                Size = new Size(ButtonWidth, ButtonHeight)
-            };
-            calculateButton.Click += (sender, e) =>
-            {
-                try
-                {
-                    double[] scores = new double[_componentWeightings.Count];
-                    for (int i = 0; i < _componentWeightings.Count; i++)
-                    {
-                        scores[i] = double.Parse(markFields[i].Text);
-                    }
-                    ShowResultScreen(scores);
-                }
-                catch (FormatException)
-                {
-                    MessageBox.Show("Please enter valid numbers for the scores.");
-                }
-            };
-            panel.Controls.Add(calculateButton);
+            // Add the Calculate button
+var calculateButton = new Button
+{
+    Text = "Calculate",
+    Location = new Point(LabelX + ButtonWidth + 10, StartY + LabelSpacing + _componentWeightings.Count * ComponentSpacing + 10),
+    Size = new Size(ButtonWidth, ButtonHeight)
+};
+calculateButton.Click += (sender, e) =>
+{
+    try
+    {
+        double[] scores = new double[_componentWeightings.Count];
+        for (int i = 0; i < _componentWeightings.Count; i++)
+        {
+            scores[i] = double.Parse(markFields[i].Text);
+        }
+        ShowResultScreen(scores);
+    }
+    catch (FormatException)
+    {
+        MessageBox.Show("Please enter valid numbers for the scores.");
+    }
+};
+panel.Controls.Add(calculateButton);
 
+// Add the Back button
+var backButton = new Button
+{
+    Text = "Back",
+    Location = new Point(LabelX, StartY + LabelSpacing + _componentWeightings.Count * ComponentSpacing + 10), // Align with Calculate button's Y
+    Size = new Size(ButtonWidth, ButtonHeight)
+};
+backButton.Click += (sender, e) => ShowPreviousScreen();
+panel.Controls.Add(backButton);
+
+            // Clear the current controls and add the new panel
             Controls.Clear();
             Controls.Add(panel);
             Controls.Add(_menuStrip);
+        }
+
+        private void ShowPreviousScreen()
+        {
+            // Navigate back to the module code entry screen
+            PromptForModuleCode(); // Call the method to show the previous screen
         }
 
         private void ShowResultScreen(double[] scores)
@@ -222,7 +260,6 @@ namespace GradeWiz
                     Text = $"{scores[i] * (_componentWeightings[componentNumber] / 100):F2}",
                     Location = new Point(LabelX + 220, StartY + LabelSpacing + i * 30),
                     AutoSize = true
-                    
                 };
 
                 panel.Controls.Add(componentLabel);
