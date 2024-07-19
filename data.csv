@@ -1,7 +1,7 @@
-moduleCode,Component1,Component2,Component3,Component4,Component5
-40,,,,,
-41,100,,,,
-42,50,50,,,
-43,60,20,20,,
-44,25,25,25,25,
-45,20,20,20,20,20
+moduleCode,Component1,name1,Component2,name2,Component3,name3,Component4,name4,Component5,name5
+COMP0040,,,,,,,,,,
+COMP0041,100,Exam,,,,,,,,
+COMP0042,50,Test,50,Exam,,,,,,
+COMP0043,60,Exam,20,CW1,20,CW2,,,,
+COMP0044,25,Quiz,25,Group Proj,25,Test,25,Exam,,
+COMP0045,20,Exam,20,Coursework 1,20,Quiz,20,Group Project,20,Peer Review
