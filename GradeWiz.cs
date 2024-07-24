@@ -9,7 +9,6 @@ namespace GradeWiz
     public partial class GradeWiz : Form
     {
         private string _moduleCode;
-        private string _moduleName;
         private Dictionary<int, (double Weighting, string Name)> _componentDetails;
         private MenuStrip _menuStrip;
 
@@ -21,6 +20,9 @@ namespace GradeWiz
         private const int StartY = 40;
         private const int LabelSpacing = 40;
         private const int MenuStripHeight = 24;
+
+        // The absolute path to the CSV file
+        private const string CsvFilePath = @"C:\Users\rmadawho\OneDrive - University College London\ProjectsRA\testData.csv";
 
         public GradeWiz()
         {
@@ -92,6 +94,7 @@ namespace GradeWiz
                 // Show the module code entry prompt
                 PromptForModuleCode();
             };
+
             fileMenu.DropDownItems.Add(restartItem);
 
             var quitItem = new ToolStripMenuItem("Quit");
@@ -106,7 +109,7 @@ namespace GradeWiz
         private void ShowAboutDialog()
         {
             MessageBox.Show(
-                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component weightings and component marks.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
+                "GradeWiz ✔\n\nA simple app that calculates a final module mark based on component marks and weightings.\n\n© 2024 Ricki Angel\nhttps://github.com/TechAngelX\n\n" +
                 "Licensed under the GNU General Public License v3.0",
                 "About GradeWiz",
                 MessageBoxButtons.OK,
@@ -118,29 +121,28 @@ namespace GradeWiz
         {
             try
             {
-                var csvPath = Path.Combine(Environment.CurrentDirectory, "data.csv");
+                var csvPath = CsvFilePath;
                 var lines = File.ReadAllLines(csvPath);
                 bool moduleCodeFound = false;
 
                 foreach (var line in lines)
                 {
-                    var fields = line.Split('\t'); // Changed to tab-separated values
+                    var fields = line.Split(',');
 
                     var moduleCodeInFile = fields[0].ToUpper();
                     var passedCode = passedModuleCode.ToUpper(); // Ensure case insensitivity
 
                     if (moduleCodeInFile == passedCode)
                     {
-                        _moduleName = fields[1]; // Get the module name
                         _componentDetails.Clear();
 
-                        for (int i = 2; i < fields.Length; i += 2)
+                        for (int i = 1; i < fields.Length; i += 2)
                         {
                             if (i + 1 < fields.Length)
                             {
                                 if (double.TryParse(fields[i], out double weighting))
                                 {
-                                    _componentDetails[i / 2 - 1] = (weighting, fields[i + 1]);
+                                    _componentDetails[i / 2 + 1] = (weighting, fields[i + 1]);
                                 }
                             }
                         }
@@ -266,8 +268,8 @@ namespace GradeWiz
 
             var resultLabel = new Label
             {
-                Text = $"{_moduleCode.ToUpper()} {_moduleName}: Total module mark: {CalculateTotalMark(scores):F2}",
-                Font = new Font("Arial", 16, FontStyle.Bold),
+                Text = $"Total module mark: {CalculateTotalMark(scores):F2}",
+                Font = new Font("Arial", 15, FontStyle.Bold),
                 ForeColor = Color.Black,
                 Location = new Point(LabelX, StartY),
                 AutoSize = true
@@ -350,7 +352,7 @@ namespace GradeWiz
         {
             var title = string.IsNullOrEmpty(_moduleCode)
                 ? "GradeWiz ✔"
-                : $"GradeWiz ✔ - {_moduleCode.ToUpper()} {_moduleName}";
+                : $"GradeWiz ✔ - {_moduleCode.ToUpper()}";
             Text = title;
 
             // Center title (if needed)
