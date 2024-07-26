@@ -1,8 +1,14 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "hf4GAHEpuH4=",
   "success": true,
   "projectFilePath": "C:\\Users\\rmadawho\\OneDrive - University College London\\TechGits\\GradeWiz-1.5-Win\\GradeWiz.csproj",
+=======
+  "dgSpecHash": "AJaKgsL5C/4=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rmadawho\\OneDrive - University College London\\TechGits\\GradeWiz-1.0CWin\\GradeWiz.csproj",
+>>>>>>> e3c647ee8a49cab599220ad0db4ba3dce7b955d8
   "expectedPackageFiles": [
     "C:\\Users\\rmadawho\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.7\\microsoft.net.illink.tasks.8.0.7.nupkg.sha512",
     "C:\\Users\\rmadawho\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.7\\microsoft.netcore.app.runtime.win-x64.8.0.7.nupkg.sha512",
