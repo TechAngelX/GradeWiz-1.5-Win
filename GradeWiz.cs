@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using OfficeOpenXml;
-using System.IO;
-
 
 namespace GradeWiz
 {
@@ -39,7 +36,7 @@ namespace GradeWiz
             var label = new Label
             {
                 Text = "Enter Module Code:",
-                Font = new Font("Arial", titleSize, FontStyle.Bold), // Set the font to Arial, size 9, bold
+                Font = new Font("Arial", titleSize, FontStyle.Bold),
                 Location = new Point(10, 40),
                 AutoSize = true
             };
@@ -147,7 +144,7 @@ namespace GradeWiz
             var label = new Label
             {
                 Text = "Enter mark(s) for each component:\n\n",
-                Font = new Font("Arial", titleSize, FontStyle.Bold), // Set the font to Arial, size 9, bold
+                Font = new Font("Arial", titleSize, FontStyle.Bold),
                 AutoSize = true
             };
             panel.Controls.Add(label, 0, 0);
@@ -199,7 +196,7 @@ namespace GradeWiz
                 }
                 catch (FormatException)
                 {
-                    MessageBox.Show("Please enter a number between 0 and 100.");
+                    MessageBox.Show("Please enter a valid number.");
                 }
             };
             panel.Controls.Add(calculateButton, 1, _componentDetails.Count + 1);
@@ -217,111 +214,100 @@ namespace GradeWiz
             Controls.Add(_menuStrip);
         }
 
-       private void ShowResultScreen(double[] scores)
-{
-    var panel = new TableLayoutPanel
-    {
-        Dock = DockStyle.Fill,
-        AutoSize = true,
-        AutoSizeMode = AutoSizeMode.GrowAndShrink,
-        ColumnCount = 2,
-        RowCount = _componentDetails.Count + 3, // Increased row count for the export button
-        Padding = new Padding(10)
-    };
-
-    var resultLabel = new Label
-    {
-        Text = $"Total module mark: {CalculateTotalMark(scores):F2}",
-        Font = new Font("Arial", 15, FontStyle.Bold),
-        ForeColor = Color.Black,
-        AutoSize = true
-    };
-    panel.Controls.Add(resultLabel, 0, 0);
-    panel.SetColumnSpan(resultLabel, 2);
-
-    for (int i = 0; i < _componentDetails.Count; i++)
-    {
-        int componentNumber = i + 1;
-        var (weighting, name) = _componentDetails[componentNumber];
-
-        var componentLabel = new Label
+        private void ShowResultScreen(double[] scores)
         {
-            Text = $"Component {componentNumber} ({weighting}% - {name}):",
-            AutoSize = true
-        };
-        panel.Controls.Add(componentLabel, 0, i + 1);
+            var resultPanel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                ColumnCount = 2,
+                RowCount = _componentDetails.Count + 3,
+                Padding = new Padding(10)
+            };
 
-        var markLabel = new Label
-        {
-            Text = $"{scores[i] * (weighting / 100):F2}",
-            AutoSize = true
-        };
-        panel.Controls.Add(markLabel, 1, i + 1);
-    }
+            var resultLabel = new Label
+            {
+                Text = $"Total module mark: {GradeUtils.CalculateTotalMark(_componentDetails, scores):F2}",
+                Font = new Font("Arial", 15, FontStyle.Bold),
+                ForeColor = Color.Black,
+                AutoSize = true
+            };
+            resultPanel.Controls.Add(resultLabel, 0, 0);
+            resultPanel.SetColumnSpan(resultLabel, 2);
 
-    // Create a FlowLayoutPanel for the buttons
-    var buttonPanel = new FlowLayoutPanel
-    {
-        Dock = DockStyle.Fill,
-        FlowDirection = FlowDirection.LeftToRight, // Align buttons horizontally
-        AutoSize = true,
-        Padding = new Padding(10),
-        WrapContents = false // Keep buttons on the same line
-    };
+            for (int i = 0; i < _componentDetails.Count; i++)
+            {
+                int componentNumber = i + 1;
+                var (weighting, name) = _componentDetails[componentNumber];
 
-    var backButton = new Button
-    {
-        Text = "Back",
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    backButton.Click += (sender, e) => ShowComponentMarkScreen();
-    buttonPanel.Controls.Add(backButton);
+                var componentLabel = new Label
+                {
+                    Text = $"Component {componentNumber} ({weighting}% - {name}):",
+                    AutoSize = true
+                };
+                resultPanel.Controls.Add(componentLabel, 0, i + 1);
 
-    var restartButton = new Button
-    {
-        Text = "Restart",
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    restartButton.Click += (sender, e) => RestartApplication();
-    buttonPanel.Controls.Add(restartButton);
+                var markLabel = new Label
+                {
+                    Text = $"{scores[i] * (weighting / 100):F2}",
+                    AutoSize = true
+                };
+                resultPanel.Controls.Add(markLabel, 1, i + 1);
+            }
 
-    var quitButton = new Button
-    {
-        Text = "Quit",
-        Size = new Size(ButtonWidth, ButtonHeight)
-    };
-    quitButton.Click += (sender, e) => Application.Exit();
-    buttonPanel.Controls.Add(quitButton);
+            var buttonPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Bottom,
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                Padding = new Padding(10),
+                WrapContents = false
+            };
 
-    // Add the Export button
-    var exportButton = new Button
-    {
-        Text = "Export to Excel",
-        Size = new Size(ButtonWidth + 50, ButtonHeight) // Adjust width if needed
-    };
-    exportButton.Click += (sender, e) =>
-    {
-        var exporter = new ExportToExcel(_moduleCode, _componentDetails, scores);
-        exporter.Export();
-    };
-    buttonPanel.Controls.Add(exportButton);
+            var backButton = new Button
+            {
+                Text = "Back",
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            backButton.Click += (sender, e) => ShowComponentMarkScreen();
+            buttonPanel.Controls.Add(backButton);
 
-    // Add the button panel to the TableLayoutPanel
-    panel.Controls.Add(buttonPanel, 0, _componentDetails.Count + 2); // Adjust row index
-    panel.SetColumnSpan(buttonPanel, 2); // Span the button panel across both columns
+            var restartButton = new Button
+            {
+                Text = "Restart",
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            restartButton.Click += (sender, e) => RestartApplication();
+            buttonPanel.Controls.Add(restartButton);
 
-    // Create a new form to show the result screen
-    var resultScreen = new Form
-    {
-        Text = "Result Screen",
-        AutoSize = true,
-        AutoSizeMode = AutoSizeMode.GrowAndShrink,
-        Controls = { panel }
-    };
+            var quitButton = new Button
+            {
+                Text = "Quit",
+                Size = new Size(ButtonWidth, ButtonHeight)
+            };
+            quitButton.Click += (sender, e) => Application.Exit();
+            buttonPanel.Controls.Add(quitButton);
 
-    resultScreen.ShowDialog();
-}
+            var exportButton = new Button
+            {
+                Text = "Export to Excel",
+                Size = new Size(ButtonWidth + 50, ButtonHeight)
+            };
+            exportButton.Click += (sender, e) =>
+            {
+                var exporter = new ExportToExcel(_moduleCode, _componentDetails, scores);
+                exporter.Export();
+            };
+            buttonPanel.Controls.Add(exportButton);
 
+            resultPanel.Controls.Add(buttonPanel, 0, _componentDetails.Count + 2);
+            resultPanel.SetColumnSpan(buttonPanel, 2);
+
+            Controls.Clear();
+            Controls.Add(resultPanel);
+            Controls.Add(_menuStrip);
+        }
 
         private void RestartApplication()
         {
