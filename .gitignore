@@ -1,0 +1,24 @@
+# Ignore the bin and obj directories
+bin/
+obj/
+
+# Optionally, ignore other files or directories
+*.csv
+*.xlsx
+*.txt
+*.ico
+*.sln
+*.csproj
+
+# Ignore any other files or patterns you need# Ignore the bin and obj directories
+bin/
+obj/
+
+# Optionally, ignore other files or directories
+*.csv
+*.xlsx
+*.txt
+*.sln
+*.csproj
+
+# Ignore any other files or patterns you need
