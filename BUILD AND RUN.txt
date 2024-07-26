@@ -1,0 +1,39 @@
+cd "C:\Users\rmadawho\OneDrive - University College London\TechGits\GradeWiz-C-Sharp-WinVersion"
+
+
+dotnet build
+dotnet run
+ 
+For RELEASE BUILD
+dotnet build GradeWiz-CWin.sln --configuration Release
+
+its in the bin/debug folder
+
+moduleCode,Component1,Component2,Component3,Component4,Component5
+MATH101,20,30,50,0,0
+PHYS202,25,25,25,25,0
+CHEM303,30,30,20,20,0
+
+
+
+module code " not found or data format incorrect in data.csv
+
+invalid number of components in data.csv for this module
+------------------------------------------------------------------------------------------------
+
+cd "C:\Users\rmadawho\OneDrive - University College London\TechGits\GradeWiz-C-Sharp-WinVersion"
+
+
+dotnet build
+dotnet run
+ 
+
+dotnet build "GradeWiz.csproj" -c Release
+
+
+dotnet publish "GradeWiz.csproj" -c Release -r win-x64 --self-contained
+
+
+dotnet build "GradeWiz-CWin.sln" -c Release
+dotnet publish -c Release -r win-x64 --self-contained
+
