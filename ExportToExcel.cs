@@ -76,10 +76,15 @@ namespace GradeWiz
                             row++;
                         }
 
+                        // Add total mark
                         worksheet.Cells[row, 1].Value = "Total Mark";
-                        worksheet.Cells[row, 2].Value = GradeUtils.CalculateTotalMark(_componentDetails, _scores);
+                        worksheet.Cells[row, 2].Value = GradeUtils.CalculateTotalMark(_componentDetails, _scores).ToString("F2"); // Format to 2 decimal places
                         worksheet.Cells[row, 2].Style.Font.Bold = true;
 
+                        // total mark row font size:
+                        worksheet.Cells[row, 1].Style.Font.Size = 13; // Set font size                      
+                        worksheet.Cells[row, 2].Style.Font.Size = 13; // Set font size
+                      
                         worksheet.Cells[row, 1, row, 4].Style.Font.Bold = true;
                         worksheet.Cells[row, 1, row, 4].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Thin);
                         worksheet.Cells[row, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;

@@ -130,89 +130,103 @@ namespace GradeWiz
         }
 
         private void ShowComponentMarkScreen()
+{
+    var panel = new TableLayoutPanel
+    {
+        Dock = DockStyle.Fill,
+        AutoSize = true,
+        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        ColumnCount = 3,
+        RowCount = _componentDetails.Count + 2,
+        Padding = new Padding(10)
+    };
+
+    var label = new Label
+    {
+        Text = "Enter mark(s) for each component:\n\n",
+        Font = new Font("Arial", titleSize, FontStyle.Bold),
+        AutoSize = true
+    };
+    panel.Controls.Add(label, 0, 0);
+    panel.SetColumnSpan(label, 3);
+
+    var markFields = new TextBox[_componentDetails.Count];
+    for (int i = 0; i < _componentDetails.Count; i++)
+    {
+        int componentNumber = i + 1;
+        var (weighting, name) = _componentDetails[componentNumber];
+
+        var componentLabel = new Label
         {
-            var panel = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                ColumnCount = 3,
-                RowCount = _componentDetails.Count + 2,
-                Padding = new Padding(10)
-            };
+            Text = $"Component {componentNumber}:",
+            AutoSize = true
+        };
+        panel.Controls.Add(componentLabel, 0, i + 1);
 
-            var label = new Label
-            {
-                Text = "Enter mark(s) for each component:\n\n",
-                Font = new Font("Arial", titleSize, FontStyle.Bold),
-                AutoSize = true
-            };
-            panel.Controls.Add(label, 0, 0);
-            panel.SetColumnSpan(label, 3);
+        var markField = new TextBox
+        {
+            Width = TextBoxWidth
+        };
+        markFields[i] = markField;
+        panel.Controls.Add(markField, 1, i + 1);
 
-            var markFields = new TextBox[_componentDetails.Count];
+        var detailLabel = new Label
+        {
+            Text = $"{weighting}% - {name}",
+            AutoSize = true
+        };
+        panel.Controls.Add(detailLabel, 2, i + 1);
+    }
+
+    var calculateButton = new Button
+    {
+        Text = "Calculate",
+        Size = new Size(ButtonWidth, ButtonHeight)
+    };
+    calculateButton.Click += (sender, e) =>
+    {
+        try
+        {
+            double[] scores = new double[_componentDetails.Count];
             for (int i = 0; i < _componentDetails.Count; i++)
             {
-                int componentNumber = i + 1;
-                var (weighting, name) = _componentDetails[componentNumber];
-
-                var componentLabel = new Label
+                if (double.TryParse(markFields[i].Text, out double score))
                 {
-                    Text = $"Component {componentNumber}:",
-                    AutoSize = true
-                };
-                panel.Controls.Add(componentLabel, 0, i + 1);
-
-                var markField = new TextBox
-                {
-                    Width = TextBoxWidth
-                };
-                markFields[i] = markField;
-                panel.Controls.Add(markField, 1, i + 1);
-
-                var detailLabel = new Label
-                {
-                    Text = $"{weighting}% - {name}",
-                    AutoSize = true
-                };
-                panel.Controls.Add(detailLabel, 2, i + 1);
-            }
-
-            var calculateButton = new Button
-            {
-                Text = "Calculate",
-                Size = new Size(ButtonWidth, ButtonHeight)
-            };
-            calculateButton.Click += (sender, e) =>
-            {
-                try
-                {
-                    double[] scores = new double[_componentDetails.Count];
-                    for (int i = 0; i < _componentDetails.Count; i++)
+                    if (score < 0 || score > 100)
                     {
-                        scores[i] = double.Parse(markFields[i].Text);
+                        MessageBox.Show("Please enter a score between 0 and 100 for each component.", "Score Out of Range", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
                     }
-                    ShowResultScreen(scores);
+                    scores[i] = score;
                 }
-                catch (FormatException)
+                else
                 {
-                    MessageBox.Show("Please enter a valid number.");
+                    MessageBox.Show("Please enter a valid number for each component's score.", "Invalid Number Format", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-            };
-            panel.Controls.Add(calculateButton, 1, _componentDetails.Count + 1);
-
-            var backButton = new Button
-            {
-                Text = "Back",
-                Size = new Size(ButtonWidth, ButtonHeight)
-            };
-            backButton.Click += (sender, e) => PromptForModuleCode();
-            panel.Controls.Add(backButton, 0, _componentDetails.Count + 1);
-
-            Controls.Clear();
-            Controls.Add(panel);
-            Controls.Add(_menuStrip);
+            }
+            ShowResultScreen(scores);
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    };
+    panel.Controls.Add(calculateButton, 1, _componentDetails.Count + 1);
+
+    var backButton = new Button
+    {
+        Text = "Back",
+        Size = new Size(ButtonWidth, ButtonHeight)
+    };
+    backButton.Click += (sender, e) => PromptForModuleCode();
+    panel.Controls.Add(backButton, 0, _componentDetails.Count + 1);
+
+    Controls.Clear();
+    Controls.Add(panel);
+    Controls.Add(_menuStrip);
+}
+
 
         private void ShowResultScreen(double[] scores)
         {
@@ -226,13 +240,14 @@ namespace GradeWiz
                 Padding = new Padding(10)
             };
 
-            var resultLabel = new Label
-            {
-                Text = $"Total module mark: {GradeUtils.CalculateTotalMark(_componentDetails, scores):F2}",
-                Font = new Font("Arial", 15, FontStyle.Bold),
-                ForeColor = Color.Black,
-                AutoSize = true
-            };
+      var resultLabel = new Label
+{
+    Text = $"Total module mark: {GradeUtils.CalculateTotalMark(_componentDetails, scores):F2}\r\n\r\n",
+    Font = new Font("Arial", 15, FontStyle.Bold),
+    ForeColor = Color.Black,
+    AutoSize = true
+};
+
             resultPanel.Controls.Add(resultLabel, 0, 0);
             resultPanel.SetColumnSpan(resultLabel, 2);
 
